@@ -2,24 +2,45 @@
 	// Paul Holden 24th July, 2007
 	// contains the code that controls polls and responses
 
-	require_once('../../config.php');
+	require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+	require_once($CFG->dirroot.'/my/pagelib.php');
+    global $PAGE;
 
 	$action = required_param('action', PARAM_ALPHA);
 	$pid = optional_param('pid', 0, PARAM_INTEGER);		
 	$cid = required_param('id', PARAM_INTEGER);
+    $srcpage = optional_param('page', '', PARAM_TEXT);
 	if ($cid == 0) $cid = 1;
 	$instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
 	$sesskey = $USER->sesskey;
+    if ($PAGE->body_id == 'admin-stickyblocks' || $srcpage == 'admin-stickyblocks') {
+        $mymoodleref = true;
+        $stickyblocksref = true;
+    } else {
+        $mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== FALSE || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
+        $stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
+    }
 
 	function test_allowed_to_update() {
 		// TODO: Proper roles & capabilities
-		global $cid;
-		if (!isteacher($cid)) {
+		global $cid, $mymoodleref;
+
+        if ($mymoodleref && has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM))) {
+            return;
+        }
+
+		if ($mymoodleref || !isteacher($cid)) {
 			error(get_string('pollwarning', 'block_poll'));
 		}
 	}
 
-	$url = "$CFG->wwwroot/course/view.php?id=$cid";
+    if ($stickyblocksref) {
+        $url = $CFG->wwwroot.'/admin/stickyblocks.php?pt=my-index';
+    } else if ($mymoodleref) {
+        $url = $CFG->wwwroot.'/my/index.php?';
+    } else {
+        $url = $CFG->wwwroot.'/course/view.php?id='.$cid;
+    }
 
 	switch ($action) {
 	  case 'create':
@@ -84,7 +105,8 @@
 			$url = $urlno;
 		} else {
 			$poll = get_record('block_poll', 'id', $pid);
-			$urlyes = "$CFG->wwwroot/blocks/poll/poll_action.php?id=$cid&amp;instanceid=$instanceid&amp;action=delete&amp;step=confirm&amp;pid=$pid";
+            $suffix = $srcpage != '' ? "&amp;page=$srcpage" : '';
+			$urlyes = "$CFG->wwwroot/blocks/poll/poll_action.php?id=$cid&amp;instanceid=$instanceid&amp;action=delete&amp;step=confirm&amp;pid=$pid$suffix";
 			notice_yesno(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
 			die();
 		}

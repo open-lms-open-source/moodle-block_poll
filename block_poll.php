@@ -27,7 +27,10 @@
 	}
 
 	function poll_can_edit() {
-		// TODO: Proper roles & capabilities
+	    if ($this->instance->pagetype == PAGE_MY_MOODLE) {
+	       return has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM));
+	    }
+
 		return isteacher($this->instance->pageid);
 	}
 
@@ -35,7 +38,7 @@
 		// TODO: Proper roles & capabilities
 		return ($this->poll->eligible == 'all') ||
 			(($this->poll->eligible == 'students') && isstudent($this->instance->pageid)) ||
-			(($this->poll->eligible == 'teachers') && isteacher($this->instance->pageid));
+			(($this->poll->eligible == 'teachers') && poll_can_edit());
 	}
 
 	function poll_results_link() {
@@ -69,8 +72,8 @@
 	function poll_print_results() {
 		$this->poll_get_results($results);
 		foreach ($results as $option => $count) {
-			$img = ($img == 0 ? 1 : 0);
-			$highest = (!$highest ? $count : $highest);
+			$img = ((isset($img) && $img == 0) ? 1 : 0);
+			$highest = ((!isset($highest) || !$highest) ? $count : $highest);
 			$imgwidth = round($this->config->maxwidth / $highest * $count);
 			$imgwidth = ($imgwidth == 0 ? 1 : $imgwidth);
 			$this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
@@ -83,7 +86,16 @@
 			return $this->content;
 		}
 
-		$this->poll = get_record('block_poll', 'id', $this->config->pollid);
+                if(!isset($this->config->pollid) || !is_numeric($this->config->pollid))
+                {
+                        $this->content = new stdClass;
+                        $this->content->text = '';
+                        $this->content->footer = '';
+                        return $this->content;
+                }
+
+                $this->poll = get_record('block_poll', 'id', $this->config->pollid);
+                
 		$this->options = get_records('block_poll_option', 'pollid', $this->poll->id);
 
 		$this->content = new stdClass;

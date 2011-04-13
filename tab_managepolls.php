@@ -21,15 +21,20 @@
 	$table->align = array('left', 'right', 'right', 'left');
 	$table->tablealign = 'left';
 	$table->width = '*';
-
-	foreach ($polls as $poll) {
-		$options = get_records('block_poll_option', 'pollid', $poll->id);
-		$responses = get_records('block_poll_response', 'pollid', $poll->id);
-		$action = print_action('preview', "{$url}responses&amp;pid=$poll->id") .
-			  print_action('edit', "{$url}editpoll&amp;pid=$poll->id") .
-			  print_action('delete', "$CFG->wwwroot/blocks/poll/poll_action.php?id=$COURSE->id&amp;instanceid=" . $this->instance->id . "&amp;action=delete&amp;pid=$poll->id");
-		$table->data[] = array($poll->name, (!$options ? '0' : count($options)), (!$responses ? '0' : count($responses)), $action);
-	}
+        
+        global $PAGE;
+        $suffix = $PAGE->body_id == 'admin-stickyblocks' ? '&amp;page=admin-stickyblocks' : '';
+        if($polls !== false)
+        {
+	        foreach ($polls as $poll) {
+		        $options = get_records('block_poll_option', 'pollid', $poll->id);
+		        $responses = get_records('block_poll_response', 'pollid', $poll->id);
+		        $action = print_action('preview', "{$url}responses&amp;pid=$poll->id") .
+			          print_action('edit', "{$url}editpoll&amp;pid=$poll->id") .
+			          print_action('delete', "$CFG->wwwroot/blocks/poll/poll_action.php?id=$COURSE->id&amp;instanceid=" . $this->instance->id . "&amp;action=delete&amp;pid=$poll->id$suffix");
+		        $table->data[] = array($poll->name, (!$options ? '0' : count($options)), (!$responses ? '0' : count($responses)), $action);
+	        }
+        }
 
 	print_table($table);
 ?>

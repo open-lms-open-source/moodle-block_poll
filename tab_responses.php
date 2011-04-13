@@ -24,13 +24,16 @@
 	}
 
 	$polls = get_records('block_poll', 'courseid', $COURSE->id);
-	foreach ($polls as $poll) {
-		$menu[$poll->id] = $poll->name;
-	}
+        if($polls !== false)
+        {
+   	        foreach ($polls as $poll) {
+		        $menu[$poll->id] = $poll->name;
+	        }
+        }
 
 	print_simple_box_start();
 	echo(get_string('editpollname', 'block_poll') . ': ');
-	choose_from_menu($menu, 'pid', $pid, 'choose', 'show_poll_results(this.options[this.selectedIndex].value);');
+	choose_from_menu( (isset($menu) && !empty($menu) ? $menu : null), 'pid', $pid, 'choose', 'show_poll_results(this.options[this.selectedIndex].value);');
 	print_simple_box_end();
 
 	if (($poll = get_record('block_poll', 'id', $pid)) && ($options = get_records('block_poll_option', 'pollid', $poll->id))) {
@@ -41,11 +44,11 @@
 		poll_sort_results($options, 'poll_custom_callback');
 
 		print_simple_box_start();
-		echo("<strong>$poll->questiontext</strong><ol>");
+		echo("<div style=\"text-align:left;\"><strong>$poll->questiontext</strong><ol>");
 		foreach ($options as $option) {
 			echo("<li>$option->optiontext ($option->responsecount)</li>");
 		}
-		echo('</ol>');
+		echo('</ol></div>');
 		print_simple_box_end();
 
 		if ($responses = get_records('block_poll_response', 'pollid', $poll->id, 'submitted ASC')) {
