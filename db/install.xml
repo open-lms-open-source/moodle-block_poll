@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/poll/db" VERSION="20080101" COMMENT="XMLDB file for Moodle poll block"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+
+    <TABLE NAME="block_poll" COMMENT="Contains polls for the poll block" NEXT="block_poll_option">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="courseid"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="name" NEXT="questiontext"/>
+        <FIELD NAME="questiontext" TYPE="text" LENGTH="big" NOTNULL="true" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="courseid" NEXT="eligible"/>
+        <FIELD NAME="eligible" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="all" SEQUENCE="false" ENUM="true" ENUMVALUES="'all', 'students', 'teachers'" PREVIOUS="questiontext" NEXT="created"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="eligible"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="block_poll_option" COMMENT="Contains options for each poll in the poll block" NEXT="block_poll_response"  PREVIOUS="block_poll">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="pollid"/>
+        <FIELD NAME="pollid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="optiontext"/>
+        <FIELD NAME="optiontext" TYPE="text" LENGTH="big" NOTNULL="true" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="pollid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+    </TABLE>
+
+    <TABLE NAME="block_poll_response" COMMENT="Contains response info for each poll in the poll block" PREVIOUS="block_poll_option">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="pollid"/>
+        <FIELD NAME="pollid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="optionid"/>
+        <FIELD NAME="optionid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="pollid" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="optionid" NEXT="submitted"/>
+        <FIELD NAME="submitted" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>
