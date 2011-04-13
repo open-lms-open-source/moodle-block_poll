@@ -25,7 +25,7 @@ function test_allowed_to_update() {
     // TODO: Proper roles & capabilities
     global $cid, $mymoodleref;
 
-    if ($mymoodleref && has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM))) {
+    if ($mymoodleref && has_capability('moodle/site:manageblocks', get_context_instance(CONTEXT_SYSTEM))) {
         return;
     }
 

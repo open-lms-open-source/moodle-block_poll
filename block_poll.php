@@ -4,6 +4,7 @@
 // this file contains the poll block class
 
 require_once("$CFG->dirroot/blocks/poll/lib.php");
+require_once($CFG->dirroot.'/my/pagelib.php');
 
 class block_poll extends block_base {
 
@@ -28,7 +29,7 @@ class block_poll extends block_base {
 
     function poll_can_edit() {
         if ($this->instance->pagetype == PAGE_MY_MOODLE) {
-           return has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM));
+           return has_capability('moodle/site:manageblocks', get_context_instance(CONTEXT_SYSTEM));
         }
 
         return isteacher($this->instance->pageid);
