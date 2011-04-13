@@ -1,128 +1,128 @@
 <?php
-	// Paul Holden 24th July, 2007
-	// contains the code that controls polls and responses
+// Paul Holden 24th July, 2007
+// contains the code that controls polls and responses
 
-	require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-	require_once($CFG->dirroot.'/my/pagelib.php');
-    global $PAGE;
+require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+require_once($CFG->dirroot.'/my/pagelib.php');
+global $PAGE;
 
-	$action = required_param('action', PARAM_ALPHA);
-	$pid = optional_param('pid', 0, PARAM_INTEGER);		
-	$cid = required_param('id', PARAM_INTEGER);
-    $srcpage = optional_param('page', '', PARAM_TEXT);
-	if ($cid == 0) $cid = 1;
-	$instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
-	$sesskey = $USER->sesskey;
-    if ($PAGE->body_id == 'admin-stickyblocks' || $srcpage == 'admin-stickyblocks') {
-        $mymoodleref = true;
-        $stickyblocksref = true;
-    } else {
-        $mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== FALSE || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
-        $stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
+$action = required_param('action', PARAM_ALPHA);
+$pid = optional_param('pid', 0, PARAM_INTEGER);
+$cid = required_param('id', PARAM_INTEGER);
+$srcpage = optional_param('page', '', PARAM_TEXT);
+if ($cid == 0) $cid = 1;
+$instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
+$sesskey = $USER->sesskey;
+if ($PAGE->body_id == 'admin-stickyblocks' || $srcpage == 'admin-stickyblocks') {
+    $mymoodleref = true;
+    $stickyblocksref = true;
+} else {
+    $mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== FALSE || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
+    $stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
+}
+
+function test_allowed_to_update() {
+    // TODO: Proper roles & capabilities
+    global $cid, $mymoodleref;
+
+    if ($mymoodleref && has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM))) {
+        return;
     }
 
-	function test_allowed_to_update() {
-		// TODO: Proper roles & capabilities
-		global $cid, $mymoodleref;
+    if ($mymoodleref || !isteacher($cid)) {
+        error(get_string('pollwarning', 'block_poll'));
+    }
+}
 
-        if ($mymoodleref && has_capability('moodle/my:manageblocks', get_context_instance(CONTEXT_SYSTEM))) {
-            return;
+if ($stickyblocksref) {
+    $url = $CFG->wwwroot.'/admin/stickyblocks.php?pt=my-index';
+} else if ($mymoodleref) {
+    $url = $CFG->wwwroot.'/my/index.php?';
+} else {
+    $url = $CFG->wwwroot.'/course/view.php?id='.$cid;
+}
+
+switch ($action) {
+    case 'create':
+        test_allowed_to_update();
+           $poll = new Object();
+        $poll->id = $pid;
+        $poll->name = required_param('name', PARAM_TEXT);
+        $poll->courseid = $cid;
+        $poll->questiontext = required_param('questiontext', PARAM_TEXT);
+        $poll->eligible = required_param('eligible', PARAM_ALPHA);
+        $poll->created = time();
+        $newid = insert_record('block_poll', $poll, true);
+        $optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
+        for ($i = 0; $i < $optioncount; $i++) {
+            $pollopt = new Object();
+            $pollopt->id = 0;
+            $pollopt->pollid = $newid;
+            $pollopt->optiontext = '';
+            insert_record('block_poll_option', $pollopt);
         }
-
-		if ($mymoodleref || !isteacher($cid)) {
-			error(get_string('pollwarning', 'block_poll'));
-		}
-	}
-
-    if ($stickyblocksref) {
-        $url = $CFG->wwwroot.'/admin/stickyblocks.php?pt=my-index';
-    } else if ($mymoodleref) {
-        $url = $CFG->wwwroot.'/my/index.php?';
-    } else {
-        $url = $CFG->wwwroot.'/course/view.php?id='.$cid;
-    }
-
-	switch ($action) {
-	  case 'create':
-		test_allowed_to_update();
-	   	$poll = new Object();
-		$poll->id = $pid;
-		$poll->name = required_param('name', PARAM_TEXT);
-		$poll->courseid = $cid;
-		$poll->questiontext = required_param('questiontext', PARAM_TEXT);
-		$poll->eligible = required_param('eligible', PARAM_ALPHA);
-		$poll->created = time();
-		$newid = insert_record('block_poll', $poll, true);
-		$optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
-		for ($i = 0; $i < $optioncount; $i++) {
-			$pollopt = new Object();
-			$pollopt->id = 0;
-			$pollopt->pollid = $newid;
-			$pollopt->optiontext = '';
-			insert_record('block_poll_option', $pollopt);
-		}
-		$url .= "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=editpoll&amp;pid=$newid";	
-		break;
-	  case 'edit':
-		test_allowed_to_update();
-		$poll = get_record('block_poll', 'id', $pid);
-		$poll->name = required_param('name', PARAM_TEXT);
-		$poll->questiontext = required_param('questiontext', PARAM_TEXT);
-		$poll->eligible = required_param('eligible', PARAM_ALPHA);
-		update_record('block_poll', $poll);
-		$options = optional_param('options', array(), PARAM_RAW);
-		foreach (array_keys($options) as $option) {
-			$pollopt = get_record('block_poll_option', 'id', $option);
-			$pollopt->optiontext = $options[$option];
-			update_record('block_poll_option', $pollopt);
-		}
-		$optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
-		if (count($options) > $optioncount) {
-			$temp = 1;
-			foreach ($options as $optid => $optname) {
-				if ($temp++ > $optioncount) break;
-				$safe[] = $optid;
-			}
-			delete_records_select('block_poll_option', "pollid = $pid AND id NOT IN (" . implode($safe, ',') . ")");
-		}
-		for ($i = count($options); $i < $optioncount; $i++) {
-			$pollopt = new Object();
-			$pollopt->id = 0;
-			$pollopt->pollid = $pid;
-			$pollopt->optiontext = '';
-			insert_record('block_poll_option', $pollopt);
-		}
-		$url .= "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=editpoll&amp;pid=$pid";
-		break;
-	  case 'delete':
-		test_allowed_to_update();
-		$step = optional_param('step', 'first', PARAM_TEXT);
-		$urlno = $url . "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=managepolls";
-		if ($step == 'confirm') {
-			delete_records('block_poll', 'id', $pid);
-			delete_records('block_poll_option', 'pollid', $pid);
-			delete_records('block_poll_response', 'pollid', $pid);
-			$url = $urlno;
-		} else {
-			$poll = get_record('block_poll', 'id', $pid);
+        $url .= "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=editpoll&amp;pid=$newid";
+        break;
+    case 'edit':
+        test_allowed_to_update();
+        $poll = get_record('block_poll', 'id', $pid);
+        $poll->name = required_param('name', PARAM_TEXT);
+        $poll->questiontext = required_param('questiontext', PARAM_TEXT);
+        $poll->eligible = required_param('eligible', PARAM_ALPHA);
+        update_record('block_poll', $poll);
+        $options = optional_param('options', array(), PARAM_RAW);
+        foreach (array_keys($options) as $option) {
+            $pollopt = get_record('block_poll_option', 'id', $option);
+            $pollopt->optiontext = $options[$option];
+            update_record('block_poll_option', $pollopt);
+        }
+        $optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
+        if (count($options) > $optioncount) {
+            $temp = 1;
+            foreach ($options as $optid => $optname) {
+                if ($temp++ > $optioncount) break;
+                $safe[] = $optid;
+            }
+            delete_records_select('block_poll_option', "pollid = $pid AND id NOT IN (" . implode($safe, ',') . ")");
+        }
+        for ($i = count($options); $i < $optioncount; $i++) {
+            $pollopt = new Object();
+            $pollopt->id = 0;
+            $pollopt->pollid = $pid;
+            $pollopt->optiontext = '';
+            insert_record('block_poll_option', $pollopt);
+        }
+        $url .= "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=editpoll&amp;pid=$pid";
+        break;
+    case 'delete':
+        test_allowed_to_update();
+        $step = optional_param('step', 'first', PARAM_TEXT);
+        $urlno = $url . "&amp;instanceid=$instanceid&amp;sesskey=$sesskey&amp;blockaction=config&amp;action=managepolls";
+        if ($step == 'confirm') {
+            delete_records('block_poll', 'id', $pid);
+            delete_records('block_poll_option', 'pollid', $pid);
+            delete_records('block_poll_response', 'pollid', $pid);
+            $url = $urlno;
+        } else {
+            $poll = get_record('block_poll', 'id', $pid);
             $suffix = $srcpage != '' ? "&amp;page=$srcpage" : '';
-			$urlyes = "$CFG->wwwroot/blocks/poll/poll_action.php?id=$cid&amp;instanceid=$instanceid&amp;action=delete&amp;step=confirm&amp;pid=$pid$suffix";
-			notice_yesno(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
-			die();
-		}
-		break;
-	  case 'respond':
-		if (!get_record('block_poll_response', 'pollid', $pid, 'userid', $USER->id)) {
-			$response = new Object();
-			$response->id = 0;
-			$response->pollid = $pid;
-			$response->optionid = required_param('rid', PARAM_INTEGER);
-			$response->userid = $USER->id;
-			$response->submitted = time();
-			insert_record('block_poll_response', $response);
-		}
-		break;
-	}
+            $urlyes = "$CFG->wwwroot/blocks/poll/poll_action.php?id=$cid&amp;instanceid=$instanceid&amp;action=delete&amp;step=confirm&amp;pid=$pid$suffix";
+            notice_yesno(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
+            die();
+        }
+        break;
+    case 'respond':
+        if (!get_record('block_poll_response', 'pollid', $pid, 'userid', $USER->id)) {
+            $response = new Object();
+            $response->id = 0;
+            $response->pollid = $pid;
+            $response->optionid = required_param('rid', PARAM_INTEGER);
+            $response->userid = $USER->id;
+            $response->submitted = time();
+            insert_record('block_poll_response', $response);
+        }
+        break;
+}
 
-	redirect($url);
+redirect($url);
 ?>
