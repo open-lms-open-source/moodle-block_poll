@@ -63,10 +63,17 @@ if (($poll = get_record('block_poll', 'id', $pid)) && ($options = get_records('b
         $table->width = '*';
 
         foreach ($responses as $response) {
-            $user = get_record('user', 'id', $response->userid, '', '', '', '', 'id, firstname, lastname, picture');
-            $table->data[] = array_merge(array(print_user_picture($user->id, $COURSE->id, $user->picture, 0, true),
+            if (!$poll->anonymous) {
+                $user = get_record('user', 'id', $response->userid, '', '', '', '', 'id, firstname, lastname, picture');
+                $table->data[] = array_merge(array(print_user_picture($user->id, $COURSE->id, $user->picture, 0, true),
                                     fullname($user), userdate($response->submitted)),
                                     get_response_checks($options, $response->optionid));
+
+            } else { //anonymous data
+                $table->data[] = array_merge(array(print_png("$CFG->pixpath/u/f2.png",35,35,true),
+                                    get_string('useranonymous', 'block_poll'), userdate($response->submitted)),
+                                    get_response_checks($options, $response->optionid));
+            }
         }
 
         print_table($table);

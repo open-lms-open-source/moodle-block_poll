@@ -12,7 +12,7 @@ class block_poll extends block_base {
 
     function init() {
         $this->title = get_string('formaltitle', 'block_poll');
-        $this->version = 2007072000;
+        $this->version = 2011041400;
     }
 
     function instance_allow_config() {

@@ -1,6 +1,7 @@
 <?php
 $string['config_param'] = 'Parameter';
 $string['config_value'] = 'Value';
+$string['editanonymousresponses'] = 'Anonymous';
 $string['editblocktitle'] = 'Block title';
 $string['editmaxbarwidth'] = 'Maximum graph width';
 $string['editpollname'] = 'Poll name';
@@ -17,5 +18,6 @@ $string['tabconfigblock'] = 'Configure Block';
 $string['tabeditpoll'] = 'Create/Edit Poll';
 $string['tabmanagepolls'] = 'Manage Polls';
 $string['tabresponses'] = 'View Responses';
+$string['useranonymous'] = 'Anonymous';
 
 ?>

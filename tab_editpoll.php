@@ -50,8 +50,12 @@ function show_poll_results(id) {
     $table->tablealign = 'left';
     $table->width = '*';
 
+    $stranonresp = get_string('editanonymousresponses', 'block_poll');
+    $anoncheck = isset($poll) && $poll->anonymous == 1 ? 'checked="checked" disabled="disabled"' : '';
+
     $table->data[] = array(get_string('editpollname', 'block_poll'), '<input type="text" name="name" value="' . ((!isset($poll) || !$poll) ? '' : $poll->name) . '" />');
     $table->data[] = array(get_string('editpollquestion', 'block_poll'), '<input type="text" name="questiontext" value="' . (!$poll ? '' : $poll->questiontext) . '" />');
+    $table->data[] = array($stranonresp, '<input type="checkbox" name="anonymous" alt="'.$stranonresp.'" value="1" '.$anoncheck.' />');
     $table->data[] = array(get_string('editpolleligible', 'block_poll'), choose_from_menu($eligible, 'eligible', (isset($poll->eligible) ? $poll->eligible : null), 'choose', '', 0, true));
     $table->data[] = array(get_string('editpolloptions', 'block_poll'), choose_from_menu($options, 'optioncount', $poll_option_count, 'choose', '', 0, true));
 

@@ -52,6 +52,7 @@ switch ($action) {
         $poll->questiontext = required_param('questiontext', PARAM_TEXT);
         $poll->eligible = required_param('eligible', PARAM_ALPHA);
         $poll->created = time();
+        $poll->anonymous = optional_param('anonymous', 0, PARAM_INTEGER);
         $newid = insert_record('block_poll', $poll, true);
         $optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
         for ($i = 0; $i < $optioncount; $i++) {
@@ -69,6 +70,9 @@ switch ($action) {
         $poll->name = required_param('name', PARAM_TEXT);
         $poll->questiontext = required_param('questiontext', PARAM_TEXT);
         $poll->eligible = required_param('eligible', PARAM_ALPHA);
+        if ($poll->anonymous == 0) { //only allow one way setting of anonymous
+            $poll->anonymous = optional_param('anonymous', 0, PARAM_INTEGER);
+        }
         update_record('block_poll', $poll);
         $options = optional_param('options', array(), PARAM_RAW);
         foreach (array_keys($options) as $option) {
