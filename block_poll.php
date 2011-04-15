@@ -75,6 +75,7 @@ class block_poll extends block_base {
         foreach ($results as $option => $count) {
             $img = ((isset($img) && $img == 0) ? 1 : 0);
             $highest = ((!isset($highest) || !$highest) ? $count : $highest);
+            $highest = ($highest == 0) ? 150 : $highest; //default to 150px, prevent division by zero
             $imgwidth = round($this->config->maxwidth / $highest * $count);
             $imgwidth = ($imgwidth == 0 ? 1 : $imgwidth);
             $this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
