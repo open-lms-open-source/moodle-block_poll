@@ -1,5 +1,3 @@
-<?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,5 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$plugin->version  = 2011113000;
-$plugin->requires = 2010112400;
+M.block_poll = {};
+
+M.block_poll.show_poll = function(Y, action, pid) {
+    Y.use('yui2-treeview', function(Y) {
+        var tree = new YAHOO.widget.TreeView(htmlid);
+
+        tree.subscribe("clickEvent", function(node, event) {
+            // we want normal clicking which redirects to url
+            return false;
+        });
+
+        if (expand_all) {
+            tree.expandAll();
+        }
+
+        tree.render();
+    });
+};

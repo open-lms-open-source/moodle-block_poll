@@ -1,10 +1,21 @@
 <?php
 
-// Paul Holden 24th July, 2007
-// this file contains the poll block class
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once("$CFG->dirroot/blocks/poll/lib.php");
-require_once($CFG->dirroot.'/my/pagelib.php');
 
 class block_poll extends block_base {
 
@@ -28,33 +39,45 @@ class block_poll extends block_base {
     }
 
     function poll_can_edit() {
-        if ($this->instance->pagetype == PAGE_MY_MOODLE) {
-           return has_capability('moodle/site:manageblocks', get_context_instance(CONTEXT_SYSTEM));
-        }
-
-        return isteacher($this->instance->pageid);
+        return has_capability('block/poll:editpoll', $this->context);
     }
 
     function poll_user_eligible() {
+        global $COURSE, $USER;
+
+        $parents = get_parent_contexts($this->context);
+        $parentctx = get_context_instance_by_id($parents[0]);
+
+        $switched = false;
+        if ($this->poll->eligible == 'students') {
+            $switched = is_role_switched($COURSE->id);
+            if (isset($USER->access['rsw'][$parentctx->path])) {
+                $switched = $switched && !role_context_capabilities($USER->access['rsw'][$parentctx->path], $this->context, 'block/poll:editpoll');
+            } else {
+                $switched = false;
+            }
+        }
         // TODO: Proper roles & capabilities
         return ($this->poll->eligible == 'all') ||
-            (($this->poll->eligible == 'students') && isstudent($this->instance->pageid)) ||
-            (($this->poll->eligible == 'teachers') && poll_can_edit());
+            (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
+            ($switched) ||
+            (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
     }
 
     function poll_results_link() {
-        global $USER;
-        $page = page_create_object($this->instance->pagetype, $this->instance->pageid);
-        $url = $page->url_get_full(array('instanceid' => $this->instance->id, 'sesskey' => $USER->sesskey, 'blockaction' => 'config', 'action' => 'responses', 'pid' => $this->poll->id));
-        return "<hr />(<a href=\"$url\">" . get_string('responses', 'block_poll') . '</a>)';
+        $url = new moodle_url('/blocks/poll/tabs.php', array('action' => 'responses', 'pid' => $this->poll->id, 'instanceid' => $this->instance->id));
+        $html = html_writer::empty_tag('hr');
+        $html .= html_writer::link($url, get_string('responses', 'block_poll'));
+        return $html;
     }
 
     function poll_print_options() {
-        global $CFG;
+        global $CFG, $COURSE;
+        //TODO: Renderer/html_writer-ify
         $this->content->text .= '<form method="get" action="' . $CFG->wwwroot . '/blocks/poll/poll_action.php">
                      <input type="hidden" name="action" value="respond" />
                      <input type="hidden" name="pid" value="' . $this->poll->id . '" />
-                     <input type="hidden" name="id" value="' . $this->instance->pageid . '" />';
+                     <input type="hidden" name="id" value="' . $COURSE->id . '" />';
         foreach ($this->options as $option) {
             $this->content->text .= "<tr><td><input type=\"radio\" id=\"r_$option->id\" name=\"rid\" value=\"$option->id\" />
                          <label for=\"r_$option->id\">$option->optiontext</label></td></tr>";
@@ -63,8 +86,9 @@ class block_poll extends block_base {
     }
 
     function poll_get_results(&$results, $sort = true) {
+        global $DB;
         foreach ($this->options as $option) {
-            $responses = get_records('block_poll_response', 'optionid', $option->id);
+            $responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
             $results[$option->optiontext] = (!$responses ? '0' : count($responses));
         }
         if ($sort) { poll_sort_results($results); }
@@ -75,6 +99,7 @@ class block_poll extends block_base {
         foreach ($results as $option => $count) {
             $img = ((isset($img) && $img == 0) ? 1 : 0);
             $highest = ((!isset($highest) || !$highest) ? $count : $highest);
+            $highest = ($highest == 0) ? 150 : $highest; //default to 150px, prevent division by zero
             $imgwidth = round($this->config->maxwidth / $highest * $count);
             $imgwidth = ($imgwidth == 0 ? 1 : $imgwidth);
             $this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
@@ -82,28 +107,29 @@ class block_poll extends block_base {
     }
 
     function get_content() {
-        global $USER;
+        global $DB, $USER;
         if ($this->content !== null) {
             return $this->content;
         }
 
         if(!isset($this->config->pollid) || !is_numeric($this->config->pollid))
         {
-            $this->content = new stdClass;
+            $this->content = new stdClass();
             $this->content->text = '';
             $this->content->footer = '';
             return $this->content;
         }
 
-        $this->poll = get_record('block_poll', 'id', $this->config->pollid);
+        $this->poll = $DB->get_record('block_poll', array('id' => $this->config->pollid));
 
-        $this->options = get_records('block_poll_option', 'pollid', $this->poll->id);
+        $this->options = $DB->get_records('block_poll_option', array('pollid' => $this->poll->id));
 
-        $this->content = new stdClass;
+        //TODO: html_table
+        $this->content = new stdClass();
         $this->content->text = '<table cellspacing="2" cellpadding="2">';
         $this->content->text .= '<tr><th>' . $this->poll->questiontext . '</th></tr>';
 
-        $response = get_record('block_poll_response', 'pollid', $this->poll->id, 'userid', $USER->id);
+        $response = $DB->get_record('block_poll_response', array('pollid' => $this->poll->id, 'userid' => $USER->id));
         $func = 'poll_print_' . (!$response && $this->poll_user_eligible() ? 'options' : 'results');
         $this->$func();
 

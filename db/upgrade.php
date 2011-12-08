@@ -1,4 +1,19 @@
-<?php  //$Id$
+<?php
+
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 // This file keeps track of upgrades to
 // the poll block
@@ -17,20 +32,19 @@
 // The commands in here will all be database-neutral,
 // using the functions defined in lib/ddllib.php
 
-function xmldb_block_poll_upgrade($oldversion=0) {
-
-    global $CFG, $THEME, $db;
-
-    $result = true;
+function xmldb_block_poll_upgrade($oldversion) {
+    global $DB;
+    $dbman = $DB->get_manager();
 
     /// Add a new column for anonymous polls
-    if ($result && $oldversion < 2011041400) {
-        $table = new XMLDBTable('block_poll');
-        $field = new XMLDBField('anonymous');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'anonymous');
-
-        $result = $result && add_field($table, $field);
+    if ($oldversion < 2011041400) {
+        $table = new xmldb_table('block_poll');
+        $field = new xmldb_field('anonymous');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'anonymous');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
     }
 
-    return $result;
+    return true;
 }
