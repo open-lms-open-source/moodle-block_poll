@@ -40,7 +40,7 @@ function xmldb_block_poll_upgrade($oldversion) {
     if ($oldversion < 2011041400) {
         $table = new xmldb_table('block_poll');
         $field = new xmldb_field('anonymous');
-        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'anonymous');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'created');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
