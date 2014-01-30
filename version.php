@@ -16,4 +16,5 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $plugin->version  = 2013082000;
-$plugin->requires = 2010112400;
+$plugin->requires = 2012062500;
+$plugin->component = 'block_poll';
