@@ -15,7 +15,7 @@ $string['nopollsavailable'] = 'No polls are currently available, select the crea
 $string['option'] = 'Option';
 $string['pluginname'] = 'Poll';
 $string['poll:editpoll'] = 'Edit and Manage Polls';
-$string['pollconfirmdelete'] = 'Are you sure you want to completely delete this poll ({$a}), including all response data?';
+$string['pollconfirmdelete'] = 'Are you sure you want to completely delete this poll ($a), including all response data?';
 $string['pollwarning'] = 'You must be a teacher to perform this action';
 $string['responses'] = 'Responses';
 $string['submit'] = 'Submit';
@@ -24,3 +24,7 @@ $string['tabeditpoll'] = 'Create/Edit Poll';
 $string['tabmanagepolls'] = 'Manage Polls';
 $string['tabresponses'] = 'View Responses';
 $string['useranonymous'] = 'Anonymous';
+
+$string['poll:myaddinstance'] = 'Add a new poll block to My home';
+$string['poll:addinstance'] = 'Add a new poll block';
+$string['poll:editpoll'] = 'Edit a poll';

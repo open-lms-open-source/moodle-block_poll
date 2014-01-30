@@ -70,11 +70,10 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid))) && ($options = 
         $table->width = '*';
 
         foreach ($responses as $response) {
-            if ($user = $DB->get_record('user', array('id' => $response->userid), user_picture::fields())) {
-                $table->data[] = array_merge(array($OUTPUT->user_picture($user, array($cid)),
-                                    fullname($user), userdate($response->submitted)),
-                block_poll_get_response_checks($options, $response->optionid));
-            }
+            $user = $DB->get_record('user', array('id' => $response->userid), user_picture::fields());
+            $table->data[] = array_merge(array($OUTPUT->user_picture($user, array($cid)),
+                                fullname($user), userdate($response->submitted)),
+                                block_poll_get_response_checks($options, $response->optionid));
         }
 
         echo html_writer::table($table);

@@ -90,7 +90,7 @@ switch ($action) {
             $poll->anonymous = optional_param('anonymous', 0, PARAM_INTEGER);
         }
         $DB->update_record('block_poll', $poll);
-        $options = optional_param('options', array(), PARAM_RAW);
+        $options = optional_param_array('options', array(), PARAM_RAW);
         foreach (array_keys($options) as $option) {
             $pollopt = $DB->get_record('block_poll_option', array('id' => $option));
             $pollopt->optiontext = $options[$option];

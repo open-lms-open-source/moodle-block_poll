@@ -34,6 +34,7 @@ class block_poll_edit_form extends block_edit_form {
             $mform->addElement('static', 'nopolls', get_string('editpollname', 'block_poll'), get_string('nopollsavailable', 'block_poll'));
         }
 
+        $mform->setType('config_maxwidth', PARAM_INT);
         $mform->addElement('text', 'config_maxwidth', get_string('editmaxbarwidth', 'block_poll'));
 
         $tabs = array('editpoll', 'managepolls', 'responses');
