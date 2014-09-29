@@ -17,8 +17,6 @@
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 
-global $PAGE;
-
 $action = required_param('action', PARAM_ALPHA);
 $pid = optional_param('pid', 0, PARAM_INTEGER);
 $cid = required_param('id', PARAM_INTEGER);
@@ -32,11 +30,15 @@ $instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
 $sesskey = $USER->sesskey;
 $mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== FALSE || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
 $stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/indexsys.php') !== FALSE;
+$context = context_course::instance($cid);
+$url = new moodle_url('/blocks/poll/poll_action.php', array('action' => $action, 'id' => $cid, 'pid' => $pid, 'instanceid' => $instanceid));
+$PAGE->set_context($context);
+$PAGE->set_url($url);
 
 function test_allowed_to_update($cid = 0) {
     global $COURSE;
     $cid = $cid == 0 ? $COURSE->id : $cid;
-    $context = get_context_instance(CONTEXT_COURSE, $cid);
+    $context = context_course::instance($cid);
 
     if (has_capability('block/poll:editpoll', $context)) {
         return true;
@@ -136,7 +138,9 @@ switch ($action) {
                 $yesparams['page'] = $srcpage;
             }
             $urlyes = new moodle_url('/blocks/poll/poll_action.php', $yesparams);
-            notice_yesno(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
+            echo $OUTPUT->header();
+            echo $OUTPUT->confirm(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
+            echo $OUTPUT->footer();
             exit;
         }
         break;

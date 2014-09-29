@@ -15,6 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$plugin->version  = 2013082000;
-$plugin->requires = 2012062500;
+$plugin->version  = 2014092900;
+$plugin->requires = 2013051400;
 $plugin->component = 'block_poll';

@@ -17,12 +17,6 @@
 
 defined('MOODLE_INTERNAL') || exit;
 
-/*echo '<script language="javascript" type="text/javascript">
-function show_poll_results(id) {
-    window.location.href="'.(str_replace('&amp;', '&', $url) . 'editpoll&pid=').' + id;
-}
-</script>';*/
-
 $PAGE->requires->js_init_call('M.util.init_select_autosubmit', array('movecourses', 'movetoid', false));
 
 $id = optional_param('id', 0, PARAM_INTEGER);
@@ -30,8 +24,7 @@ $pid = optional_param('pid', 0, PARAM_INTEGER);
 
 $polls = $DB->get_records('block_poll', array('courseid' => $cid));
 $menu = array();
-if($polls !== false)
-{
+if($polls !== false) {
     foreach ($polls as $poll) {
         $menu[$poll->id] = $poll->name;
     }
@@ -63,7 +56,8 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blocka
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'course', 'value' => $COURSE->id));
 
 $eligible = array('all' => get_string('all'), 'students' => get_string('students'), 'teachers' => get_string('teachers'));
-for ($i = 1; $i <= 10; $options[$i++] = ($i - 1)) {}
+for ($i = 1; $i <= 10; $options[$i++] = ($i - 1)) {
+}
 
 $table = new html_table();
 $table->head = array(get_string('config_param', 'block_poll'), get_string('config_value', 'block_poll'));
@@ -81,12 +75,11 @@ $table->data[] = array(get_string('editpolleligible', 'block_poll'), html_writer
 $table->data[] = array(get_string('editpolloptions', 'block_poll'), html_writer::select($options, 'optioncount', $poll_option_count));
 
 $option_count = 0;
-if(is_array($poll_options))
-{
-foreach ($poll_options as $option) {
-    $option_count++;
-    $table->data[] = array(get_string('option', 'block_poll') . " $option_count", "<input type=\"text\" name=\"options[$option->id]\" value=\"$option->optiontext\" />");
-}
+if(is_array($poll_options)) {
+    foreach ($poll_options as $option) {
+        $option_count++;
+        $table->data[] = array(get_string('option', 'block_poll') . " $option_count", "<input type=\"text\" name=\"options[$option->id]\" value=\"$option->optiontext\" />");
+    }
 }
 for ($i = $option_count + 1; $i <= $poll_option_count; $i++) {
     $table->data[] = array(get_string('option', 'block_poll') . " $i", '<input type="text" name="newoptions[]" />');

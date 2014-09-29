@@ -21,16 +21,16 @@ class block_poll extends block_base {
 
     var $poll, $options;
 
-    function init() {
+    public function init() {
         $this->title = get_string('formaltitle', 'block_poll');
         $this->version = 2011041400;
     }
 
-    function instance_allow_config() {
+    public function instance_allow_config() {
         return true;
     }
 
-    function specialization() {
+    public function specialization() {
         if (!empty($this->config) && !empty($this->config->customtitle)) {
             $this->title = $this->config->customtitle;
         } else {
@@ -38,15 +38,14 @@ class block_poll extends block_base {
         }
     }
 
-    function poll_can_edit() {
+    public function poll_can_edit() {
         return has_capability('block/poll:editpoll', $this->context);
     }
 
-    function poll_user_eligible() {
+    public function poll_user_eligible() {
         global $COURSE, $USER;
 
-        $parents = get_parent_contexts($this->context);
-        $parentctx = get_context_instance_by_id($parents[0]);
+        $parentctx = $this->context->get_course_context();
 
         $switched = false;
         if ($this->poll->eligible == 'students') {
@@ -64,14 +63,14 @@ class block_poll extends block_base {
             (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
     }
 
-    function poll_results_link() {
+    public function poll_results_link() {
         $url = new moodle_url('/blocks/poll/tabs.php', array('action' => 'responses', 'pid' => $this->poll->id, 'instanceid' => $this->instance->id));
         $html = html_writer::empty_tag('hr');
         $html .= html_writer::link($url, get_string('responses', 'block_poll'));
         return $html;
     }
 
-    function poll_print_options() {
+    public function poll_print_options() {
         global $CFG, $COURSE;
         //TODO: Renderer/html_writer-ify
         $this->content->text .= '<form method="get" action="' . $CFG->wwwroot . '/blocks/poll/poll_action.php">
@@ -85,7 +84,7 @@ class block_poll extends block_base {
         $this->content->text .= '<tr><td><input type="submit" value="' . get_string('submit', 'block_poll') . '" /></td></tr></form>';
     }
 
-    function poll_get_results(&$results, $sort = true) {
+    public function poll_get_results(&$results, $sort = true) {
         global $DB;
         foreach ($this->options as $option) {
             $responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
@@ -94,7 +93,7 @@ class block_poll extends block_base {
         if ($sort) { poll_sort_results($results); }
     }
 
-    function poll_print_results() {
+    public function poll_print_results() {
         $this->poll_get_results($results);
         foreach ($results as $option => $count) {
             $img = ((isset($img) && $img == 0) ? 1 : 0);
@@ -106,7 +105,7 @@ class block_poll extends block_base {
         }
     }
 
-    function get_content() {
+    public function get_content() {
         global $DB, $USER;
         if ($this->content !== null) {
             return $this->content;

@@ -26,8 +26,8 @@ if (!$bi = $DB->get_record('block_instances', array('id' => $instanceid))) {
 $config = unserialize(base64_decode($bi->configdata));
 
 // Check login and get context.
-$context = get_context_instance(CONTEXT_BLOCK, $instanceid);
-$cid = get_courseid_from_context($context);
+$context = context_block::instance($instanceid);
+$cid = $context->get_course_context()->instanceid;
 if ($cid === false) {
     $cid = SITEID;
 }
