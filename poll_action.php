@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,17 +22,19 @@ $cid = required_param('id', PARAM_INTEGER);
 $srcpage = optional_param('page', '', PARAM_TEXT);
 if ($cid == 0) {
     if (!$cid = optional_param('course', 0, PARAM_INT)) {
-        $cid = 1;
+        $cid = SITEID;
     }
 }
 $instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
 $sesskey = $USER->sesskey;
-$mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== FALSE || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== FALSE;
-$stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/indexsys.php') !== FALSE;
+$mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== false
+    || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== false;
+$stickyblocksref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/indexsys.php') !== false;
 $context = context_course::instance($cid);
-$url = new moodle_url('/blocks/poll/poll_action.php', array('action' => $action, 'id' => $cid, 'pid' => $pid, 'instanceid' => $instanceid));
+$pageurl = new moodle_url('/blocks/poll/poll_action.php',
+    array('action' => $action, 'id' => $cid, 'pid' => $pid, 'instanceid' => $instanceid));
 $PAGE->set_context($context);
-$PAGE->set_url($url);
+$PAGE->set_url($pageurl);
 
 function test_allowed_to_update($cid = 0) {
     global $COURSE;
@@ -48,22 +49,22 @@ function test_allowed_to_update($cid = 0) {
 }
 
 if ($stickyblocksref) {
-    $url = $CFG->wwwroot.'/admin/stickyblocks.php?pt=my-index';
+    $url = new moodle_url('/my/indexsys.php', array('pt' => 'my-index'));
 } else if ($mymoodleref) {
-    $url = $CFG->wwwroot.'/my/index.php?';
+    $url = new moodle_url('/my/index.php');
 } else {
-    $url = $CFG->wwwroot.'/course/view.php?id='.$cid;
+    $url = new moodle_url('/course/view.php', array('id' => $cid));
 }
 
 $tabs = array('create', 'delete', 'edit');
 if (in_array($action, $tabs)) {
-    $url = $CFG->wwwroot.'/blocks/poll/tabs.php?';
+    $url = new moodle_url('/blocks/poll/tabs.php');
 }
 
 switch ($action) {
     case 'create':
         test_allowed_to_update($cid);
-           $poll = new stdClass();
+        $poll = new stdClass();
         $poll->id = $pid;
         $poll->name = required_param('name', PARAM_TEXT);
         $poll->courseid = $cid;
@@ -80,7 +81,13 @@ switch ($action) {
             $pollopt->optiontext = '';
             $DB->insert_record('block_poll_option', $pollopt);
         }
-        $url .= "&instanceid=$instanceid&sesskey=$sesskey&blockaction=config&action=editpoll&pid=$newid";
+        $url->params(array(
+            'instanceid' => $instanceid,
+            'sesskey' => $sesskey,
+            'blockaction' => 'config',
+            'action' => 'editpoll',
+            'pid' => $newid,
+        ));
         break;
     case 'edit':
         test_allowed_to_update($cid);
@@ -88,7 +95,7 @@ switch ($action) {
         $poll->name = required_param('name', PARAM_TEXT);
         $poll->questiontext = required_param('questiontext', PARAM_TEXT);
         $poll->eligible = required_param('eligible', PARAM_ALPHA);
-        if ($poll->anonymous == 0) { //only allow one way setting of anonymous
+        if ($poll->anonymous == 0) { // Only allow one way setting of anonymous.
             $poll->anonymous = optional_param('anonymous', 0, PARAM_INTEGER);
         }
         $DB->update_record('block_poll', $poll);
@@ -120,12 +127,24 @@ switch ($action) {
             $pollopt->optiontext = '';
             $DB->insert_record('block_poll_option', $pollopt);
         }
-        $url .= "&instanceid=$instanceid&sesskey=$sesskey&blockaction=config&action=editpoll&pid=$pid";
+        $url->params(array(
+            'instanceid' => $instanceid,
+            'sesskey' => $sesskey,
+            'blockaction' => 'config',
+            'action' => 'editpoll',
+            'pid' => $pid,
+        ));
         break;
     case 'delete':
         test_allowed_to_update($cid);
         $step = optional_param('step', 'first', PARAM_TEXT);
-        $urlno = $url . "&instanceid=$instanceid&sesskey=$sesskey&blockaction=config&action=managepolls";
+        $urlno = clone $url;
+        $urlno->params(array(
+            'instanceid' => $instanceid,
+            'sesskey' => $sesskey,
+            'blockaction' => 'config',
+            'action' => 'managepolls',
+        ));
         if ($step == 'confirm') {
             $DB->delete_records('block_poll', array('id' => $pid));
             $DB->delete_records('block_poll_option', array('pollid' => $pid));
@@ -134,13 +153,19 @@ switch ($action) {
         } else {
             $poll = $DB->get_record('block_poll', array('id' => $pid));
             $yesparams = array('id' => $cid, 'instanceid' => $instanceid, 'action' => 'delete', 'step' => 'confirm', 'pid' => $pid);
+            $urlyes = new moodle_url('/blocks/poll/poll_action.php', array(
+                'id' => $cid,
+                'instanceid' => $instanceid,
+                'action' => 'delete',
+                'step' => 'confirm',
+                'pid' => $pid,
+            ));
             if ($srcpage != '') {
-                $yesparams['page'] = $srcpage;
+                $urlyes->param('page', $srcpage);
             }
-            $urlyes = new moodle_url('/blocks/poll/poll_action.php', $yesparams);
-            echo $OUTPUT->header();
-            echo $OUTPUT->confirm(get_string('pollconfirmdelete', 'block_poll', $poll->name), $urlyes, $urlno);
-            echo $OUTPUT->footer();
+
+            $renderer = $PAGE->get_renderer('block_poll');
+            echo $renderer->delete_confirmation_page($poll, $urlyes, $urlno);
             exit;
         }
         break;

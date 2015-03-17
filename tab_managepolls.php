@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -26,7 +25,7 @@ $view = get_string('view');
 
 $polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id));
 
-//TODO: Use html_table
+// TODO: Use html_table.
 $table = new html_table();
 $table->head = array(get_string('editpollname', 'block_poll'),
              get_string('editpolloptions', 'block_poll'),
@@ -41,15 +40,16 @@ if ($polls !== false) {
         $options = $DB->get_records('block_poll_option', array('pollid' => $poll->id));
         $responses = $DB->get_records('block_poll_response', array('pollid' => $poll->id));
 
-        $url_preview = clone $url;
-        $url_preview->params(array('action' => 'responses', 'pid' => $poll->id));
-        $url_edit = clone $url;
-        $url_edit->params(array('action' => 'editpoll', 'pid' => $poll->id));
-        $url_delete = new moodle_url('/blocks/poll/poll_action.php', array('action' => 'delete', 'id' => $cid, 'pid' => $poll->id, 'instanceid' => $instanceid));
+        $urlpreview = clone $url;
+        $urlpreview->params(array('action' => 'responses', 'pid' => $poll->id));
+        $urledit = clone $url;
+        $urledit->params(array('action' => 'editpoll', 'pid' => $poll->id));
+        $urldelete = new moodle_url('/blocks/poll/poll_action.php',
+            array('action' => 'delete', 'id' => $cid, 'pid' => $poll->id, 'instanceid' => $instanceid));
 
-        $action = print_action('preview', $url_preview) .
-                  print_action('edit', $url_edit) .
-                  print_action('delete', $url_delete);
+        $action = print_action('preview', $urlpreview) .
+                  print_action('edit', $urledit) .
+                  print_action('delete', $urldelete);
         $table->data[] = array($poll->name, (!$options ? '0' : count($options)), (!$responses ? '0' : count($responses)), $action);
     }
 }

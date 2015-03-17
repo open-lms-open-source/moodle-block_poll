@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -19,11 +18,11 @@ require_once("$CFG->dirroot/blocks/poll/lib.php");
 
 class block_poll extends block_base {
 
-    var $poll, $options;
+    public $poll, $options;
 
     public function init() {
         $this->title = get_string('formaltitle', 'block_poll');
-        $this->version = 2011041400;
+        $this->version = 2015031700;
     }
 
     public function instance_allow_config() {
@@ -45,18 +44,20 @@ class block_poll extends block_base {
     public function poll_user_eligible() {
         global $COURSE, $USER;
 
-        $parentctx = $this->context->get_course_context();
+        $parents = $this->context->get_parent_context_ids();
+        $parentctx = context::instance_by_id($parents[0]);
 
         $switched = false;
         if ($this->poll->eligible == 'students') {
             $switched = is_role_switched($COURSE->id);
             if (isset($USER->access['rsw'][$parentctx->path])) {
-                $switched = $switched && !role_context_capabilities($USER->access['rsw'][$parentctx->path], $this->context, 'block/poll:editpoll');
+                $switched = $switched
+                    && !role_context_capabilities($USER->access['rsw'][$parentctx->path], $this->context, 'block/poll:editpoll');
             } else {
                 $switched = false;
             }
         }
-        // TODO: Proper roles & capabilities
+        // TODO: Proper roles & capabilities.
         return ($this->poll->eligible == 'all') ||
             (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
             ($switched) ||
@@ -64,7 +65,8 @@ class block_poll extends block_base {
     }
 
     public function poll_results_link() {
-        $url = new moodle_url('/blocks/poll/tabs.php', array('action' => 'responses', 'pid' => $this->poll->id, 'instanceid' => $this->instance->id));
+        $url = new moodle_url('/blocks/poll/tabs.php',
+            array('action' => 'responses', 'pid' => $this->poll->id, 'instanceid' => $this->instance->id));
         $html = html_writer::empty_tag('hr');
         $html .= html_writer::link($url, get_string('responses', 'block_poll'));
         return $html;
@@ -72,7 +74,7 @@ class block_poll extends block_base {
 
     public function poll_print_options() {
         global $CFG, $COURSE;
-        //TODO: Renderer/html_writer-ify
+        // TODO: Renderer/html_writer-ify.
         $this->content->text .= '<form method="get" action="' . $CFG->wwwroot . '/blocks/poll/poll_action.php">
                      <input type="hidden" name="action" value="respond" />
                      <input type="hidden" name="pid" value="' . $this->poll->id . '" />
@@ -81,7 +83,8 @@ class block_poll extends block_base {
             $this->content->text .= "<tr><td><input type=\"radio\" id=\"r_$option->id\" name=\"rid\" value=\"$option->id\" />
                          <label for=\"r_$option->id\">$option->optiontext</label></td></tr>";
         }
-        $this->content->text .= '<tr><td><input type="submit" value="' . get_string('submit', 'block_poll') . '" /></td></tr></form>';
+        $this->content->text .= '<tr><td><input type="submit" value="' . get_string('submit', 'block_poll') . '" />
+            </td></tr></form>';
     }
 
     public function poll_get_results(&$results, $sort = true) {
@@ -90,7 +93,9 @@ class block_poll extends block_base {
             $responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
             $results[$option->optiontext] = (!$responses ? '0' : count($responses));
         }
-        if ($sort) { poll_sort_results($results); }
+        if ($sort) {
+            poll_sort_results($results);
+        }
     }
 
     public function poll_print_results() {
@@ -98,7 +103,7 @@ class block_poll extends block_base {
         foreach ($results as $option => $count) {
             $img = ((isset($img) && $img == 0) ? 1 : 0);
             $highest = ((!isset($highest) || !$highest) ? $count : $highest);
-            $highest = ($highest == 0) ? 150 : $highest; //default to 150px, prevent division by zero
+            $highest = ($highest == 0) ? 150 : $highest; // Default to 150px, prevent division by zero.
             $imgwidth = round($this->config->maxwidth / $highest * $count);
             $imgwidth = ($imgwidth == 0 ? 1 : $imgwidth);
             $this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
@@ -111,8 +116,7 @@ class block_poll extends block_base {
             return $this->content;
         }
 
-        if(!isset($this->config->pollid) || !is_numeric($this->config->pollid))
-        {
+        if (!isset($this->config->pollid) || !is_numeric($this->config->pollid)) {
             $this->content = new stdClass();
             $this->content->text = '';
             $this->content->footer = '';
@@ -123,7 +127,7 @@ class block_poll extends block_base {
 
         $this->options = $DB->get_records('block_poll_option', array('pollid' => $this->poll->id));
 
-        //TODO: html_table
+        // TODO: html_table.
         $this->content = new stdClass();
         $this->content->text = '<table cellspacing="2" cellpadding="2">';
         $this->content->text .= '<tr><th>' . $this->poll->questiontext . '</th></tr>';

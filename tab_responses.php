@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,13 +24,14 @@ function poll_custom_callback($a, $b) {
 
 function block_poll_get_response_checks($options, $selected) {
     foreach ($options as $option) {
-        $arr[] = html_writer::checkbox('', '', $option->id == $selected, '', array('onclick' => 'this.checked='.($option->id == $selected ? 'true' : 'false')));
+        $arr[] = html_writer::checkbox('', '', $option->id == $selected, '',
+            array('onclick' => 'this.checked='.($option->id == $selected ? 'true' : 'false')));
     }
     return $arr;
 }
 
 $polls = $DB->get_records('block_poll', array('courseid' => $cid));
-if($polls !== false) {
+if ($polls !== false) {
     foreach ($polls as $poll) {
         $menu[$poll->id] = $poll->name;
     }
@@ -42,7 +42,8 @@ echo html_writer::tag('div', get_string('editpollname', 'block_poll') . ': ', ar
 echo $OUTPUT->single_select($url, 'pid', $menu, $pid);
 echo $OUTPUT->box_end();
 
-if (($poll = $DB->get_record('block_poll', array('id' => $pid))) && ($options = $DB->get_records('block_poll_option', array('pollid' => $poll->id)))) {
+if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
+    && ($options = $DB->get_records('block_poll_option', array('pollid' => $poll->id)))) {
     foreach ($options as $option) {
         $option->responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
         $option->responsecount = (!$option->responses ? 0 : count($option->responses));
@@ -57,7 +58,8 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid))) && ($options = 
     echo('</ol></div>');
     echo $OUTPUT->box_end();
 
-    if (!(isset($poll->anonymous) && $poll->anonymous == 1) && $responses = $DB->get_records('block_poll_response', array('pollid' => $poll->id), 'submitted ASC')) {
+    if (!(isset($poll->anonymous) && $poll->anonymous == 1)
+        && $responses = $DB->get_records('block_poll_response', array('pollid' => $poll->id), 'submitted ASC')) {
         $responsecount = count($responses);
         $optioncount = count($options);
 

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,26 +20,18 @@ $action = required_param('action', PARAM_ALPHA);
 $instanceid = required_param('instanceid', PARAM_INT);
 
 if (!$bi = $DB->get_record('block_instances', array('id' => $instanceid))) {
-    print_error('Missing block instance!'); //TODO: Stringify
+    print_error('Missing block instance!'); // TODO: Stringify.
 }
 $config = unserialize(base64_decode($bi->configdata));
 
 // Check login and get context.
 $context = context_block::instance($instanceid);
-$cid = $context->get_course_context()->instanceid;
-if ($cid === false) {
-    $cid = SITEID;
+$cid = SITEID;
+if ($coursecontext = $context->get_course_context(false)) {
+    $cid = $coursecontext->instanceid;
 }
 require_login($cid);
 require_capability('block/poll:editpoll', $context);
-
-if ($action == 'configblock') {
-    $url = new moodle_url('/course/view.php', array('id' => $cid, 'sesskey' => $USER->sesskey, 'bui_editid' => $instanceid));
-    if ($bi->pagetypepattern == 'my-index') {
-        $url = new moodle_url('/my/index.php', array('sesskey' => $USER->sesskey, 'bui_editid' => $instanceid));
-    }
-    redirect($url);
-}
 
 $tabs = array();
 $tabnames = array('configblock', 'editpoll', 'managepolls', 'responses');
@@ -54,6 +45,14 @@ if (!in_array($action, $tabnames)) {
     $action = 'configblock';
 }
 
+if ($action == 'configblock') {
+    $url = new moodle_url('/course/view.php', array('id' => $cid, 'sesskey' => $USER->sesskey, 'bui_editid' => $instanceid));
+    if ($bi->pagetypepattern == 'my-index') {
+        $url = new moodle_url('/my/index.php', array('sesskey' => $USER->sesskey, 'bui_editid' => $instanceid));
+    }
+    redirect($url);
+}
+
 $PAGE->set_url('/blocks/poll/tabs.php');
 $PAGE->set_context($context);
 $PAGE->requires->css('/blocks/poll/styles.css');
@@ -62,6 +61,6 @@ echo $OUTPUT->header();
 print_tabs(array($tabs), $action);
 
 echo html_writer::empty_tag('br');
-include("tab_$action.php");
+require("tab_$action.php");
 
 echo $OUTPUT->footer();

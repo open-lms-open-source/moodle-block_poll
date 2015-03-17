@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -31,7 +30,8 @@ class block_poll_edit_form extends block_edit_form {
             }
             $mform->addElement('select', 'config_pollid', get_string('editpollname', 'block_poll'), $list);
         } else {
-            $mform->addElement('static', 'nopolls', get_string('editpollname', 'block_poll'), get_string('nopollsavailable', 'block_poll'));
+            $mform->addElement('static', 'nopolls', get_string('editpollname', 'block_poll'),
+                get_string('nopollsavailable', 'block_poll'));
         }
 
         $mform->setType('config_maxwidth', PARAM_INT);
