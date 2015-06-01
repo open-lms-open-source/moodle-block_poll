@@ -100,12 +100,17 @@ class block_poll extends block_base {
 
     public function poll_print_results() {
         $this->poll_get_results($results);
+        $highest = 1;
+        foreach ($results as $option => $count) {
+            if ($count > $highest) {
+                $highest = $count;
+            }
+        }
+        $maxwidth = !empty($this->config->maxwidth) ? $this->config->maxwidth : 150;
+
         foreach ($results as $option => $count) {
             $img = ((isset($img) && $img == 0) ? 1 : 0);
-            $highest = ((!isset($highest) || !$highest) ? $count : $highest);
-            $highest = ($highest == 0) ? 150 : $highest; // Default to 150px, prevent division by zero.
-            $imgwidth = round($this->config->maxwidth / $highest * $count);
-            $imgwidth = ($imgwidth == 0 ? 1 : $imgwidth);
+            $imgwidth = round($count / $highest * $maxwidth);
             $this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
         }
     }
