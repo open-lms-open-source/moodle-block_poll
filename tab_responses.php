@@ -16,6 +16,8 @@
 
 $pid = optional_param('pid', 0, PARAM_INTEGER);
 
+require_once(dirname(__FILE__) . '/lib.php');
+
 function poll_custom_callback($a, $b) {
     $counta = $a->responsecount;
     $countb = $b->responsecount;
