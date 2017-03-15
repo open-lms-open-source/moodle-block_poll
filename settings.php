@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   local_cas_help_links
+ * @package   block_poll
+ * @copyright 2016, Robert Russo
  * @copyright 2016, Louisiana State University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,9 +30,6 @@ if (is_siteadmin()) {
 
     // Create the new settings page
     $settings = new admin_settingpage('block_poll', get_string('formaltitle', 'block_poll'));
-
-    // Create
-    //$ADMIN->add('blocks', $settings);
 
     // default_minumum user responses before showing users
     $settings->add( new admin_setting_configtext(
