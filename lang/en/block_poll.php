@@ -43,3 +43,6 @@ $string['useranonymous'] = 'Anonymous';
 $string['poll:myaddinstance'] = 'Add a new poll block to My home';
 $string['poll:addinstance'] = 'Add a new poll block';
 $string['poll:editpoll'] = 'Edit a poll';
+
+$string['minresponses'] = 'Minumum # of responses';
+$string['minresponseshelp'] = 'Minimum number of responses required before names of respondees are displayed. <br /><strong>Set this to ZERO (0) do disable the display of respondees.</strong>';

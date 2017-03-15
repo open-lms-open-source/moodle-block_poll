@@ -20,6 +20,15 @@ class block_poll extends block_base {
 
     public $poll, $options;
 
+    /**
+     * Whether the block has configuration (it does)
+     *
+     * @return  boolean     We do have configuration
+     */
+    public function has_config() {
+        return true;
+    }
+
     public function init() {
         $this->title = get_string('formaltitle', 'block_poll');
         $this->version = 2015031700;
