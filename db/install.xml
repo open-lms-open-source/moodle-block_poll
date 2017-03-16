@@ -14,6 +14,7 @@
         <FIELD NAME="eligible" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="all" SEQUENCE="false" PREVIOUS="questiontext" NEXT="created"/>
         <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="eligible" NEXT="anonymous"/>
         <FIELD NAME="anonymous" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="created"/>
+        <FIELD NAME="locked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="created"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" />
