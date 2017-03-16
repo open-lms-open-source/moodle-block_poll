@@ -16,12 +16,14 @@
 
 function print_action($action, $url) {
     global $OUTPUT;
-    return html_writer::link($url, $OUTPUT->pix_icon("t/$action", "$action"));
+    return html_writer::link($url, html_writer::tag('img', '', array('src' => 'pix/' . $action . '.svg', 'title' => $action, 'alt' => $action)));
 }
 
 $edit = get_string('edit');
+$lock = get_string('lock', 'block_poll');
 $delete = get_string('delete');
 $view = get_string('view');
+$preview = get_string('preview');
 
 $polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id));
 
@@ -46,9 +48,15 @@ if ($polls !== false) {
         $urledit->params(array('action' => 'editpoll', 'pid' => $poll->id));
         $urldelete = new moodle_url('/blocks/poll/poll_action.php',
             array('action' => 'delete', 'id' => $cid, 'pid' => $poll->id, 'instanceid' => $instanceid));
+        $urllock = new moodle_url('/blocks/poll/poll_action.php',
+            array('action' => 'lock', 'id' => $cid, 'pid' => $poll->id, 'instanceid' => $instanceid));
 
-        $action = print_action('preview', $urlpreview) .
+        $action = $poll->locked == 0 ? 
+                  print_action('preview', $urlpreview) .
+                  print_action('lock', $urllock) .
                   print_action('edit', $urledit) .
+                  print_action('delete', $urldelete) : 
+                  print_action('preview', $urlpreview) .
                   print_action('delete', $urldelete);
         $table->data[] = array($poll->name, (!$options ? '0' : count($options)), (!$responses ? '0' : count($responses)), $action);
     }

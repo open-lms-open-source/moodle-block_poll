@@ -56,7 +56,7 @@ if ($stickyblocksref) {
     $url = new moodle_url('/course/view.php', array('id' => $cid));
 }
 
-$tabs = array('create', 'delete', 'edit');
+$tabs = array('create', 'lock', 'edit', 'delete');
 if (in_array($action, $tabs)) {
     $url = new moodle_url('/blocks/poll/tabs.php');
 }
@@ -88,6 +88,39 @@ switch ($action) {
             'action' => 'editpoll',
             'pid' => $newid,
         ));
+        break;
+    case 'lock':
+        test_allowed_to_update($cid);
+        $step = optional_param('step', 'first', PARAM_TEXT);
+        $urlno = clone $url;
+        $urlno->params(array(
+            'instanceid' => $instanceid,
+            'sesskey' => $sesskey,
+            'blockaction' => 'config',
+            'action' => 'managepolls',
+        ));
+        if ($step == 'confirm') {
+            $sql = 'UPDATE {block_poll} p SET p.locked = "1" WHERE id = :pid';
+            $DB->execute($sql, array('pid' => $pid));
+            $url = $urlno;
+        } else {
+            $poll = $DB->get_record('block_poll', array('id' => $pid));
+            $yesparams = array('id' => $cid, 'instanceid' => $instanceid, 'action' => 'lock', 'step' => 'confirm', 'pid' => $pid);
+            $urlyes = new moodle_url('/blocks/poll/poll_action.php', array(
+                'id' => $cid,
+                'instanceid' => $instanceid,
+                'action' => 'lock',
+                'step' => 'confirm',
+                'pid' => $pid,
+            ));
+            if ($srcpage != '') {
+                $urlyes->param('page', $srcpage);
+            }
+
+            $renderer = $PAGE->get_renderer('block_poll');
+            echo $renderer->lock_confirmation_page($poll, $urlyes, $urlno);
+            exit;
+        }
         break;
     case 'edit':
         test_allowed_to_update($cid);

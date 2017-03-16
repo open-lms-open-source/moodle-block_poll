@@ -22,4 +22,11 @@ class block_poll_renderer extends plugin_renderer_base {
         $html .= $this->output->footer();
         return $html;
     }
+    public function lock_confirmation_page($poll, $yes, $no) {
+        $html = $this->output->header();
+        $message = get_string('pollconfirmlock', 'block_poll', $poll->name);
+        $html .= $this->output->confirm($message, $yes, $no);
+        $html .= $this->output->footer();
+        return $html;
+    }
 }

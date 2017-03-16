@@ -39,9 +39,9 @@ class block_poll extends block_base {
     }
 
     public function specialization() {
-        if (!empty($this->config) && !empty($this->config->customtitle)) {
+    if (!empty($this->config) && !empty($this->config->customtitle)) {
             $this->title = $this->config->customtitle;
-        } else {
+    } else {
             $this->title = get_string('formaltitle', 'block_poll');
         }
     }
@@ -67,10 +67,14 @@ class block_poll extends block_base {
             }
         }
         // TODO: Proper roles & capabilities.
-        return ($this->poll->eligible == 'all') ||
-            (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
-            ($switched) ||
-            (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
+        if ($this->poll->locked == 0) {
+            return ($this->poll->eligible == 'all') ||
+                (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
+                ($switched) ||
+                (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
+        } else { 
+           return false; 
+        }
     }
 
     public function poll_results_link() {
@@ -138,6 +142,7 @@ class block_poll extends block_base {
         }
 
         $this->poll = $DB->get_record('block_poll', array('id' => $this->config->pollid));
+        $footertext = $this->poll->anonymous == 1 ? (html_writer::div(get_string('useranonymous', 'block_poll'), 'center alert alert-success alert-block fade in')) : (html_writer::div(get_string('notanonymous', 'block_poll'), 'center alert alert-error alert-block fade in'));
 
         $this->options = $DB->get_records('block_poll_option', array('pollid' => $this->poll->id));
 
@@ -152,7 +157,9 @@ class block_poll extends block_base {
 
         $this->content->text .= '</table>';
 
-        $this->content->footer = ($this->poll_can_edit() ? $this->poll_results_link() : '');
+        $this->content->footer = '';
+        $this->content->footer .= ($this->poll_can_edit() ? $this->poll_results_link() : '');
+        $this->content->footer .= $footertext;
 
         return $this->content;
     }

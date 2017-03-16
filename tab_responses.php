@@ -84,13 +84,17 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
         }
 
         echo html_writer::table($table);
-    } else if ((isset($poll->anonymous) && $poll->anonymous == 1)
+    } else if ((isset($poll->anonymous) && $poll->anonymous == 1 && $poll->locked == 1)
         && $responses = $DB->get_records('block_poll_response', array('pollid' => $poll->id), 'userid ASC')) {
         $responsecount = count($responses);
         // Get min responses required to show users. If unset, set responses to zero to retain default behavior.
         $responsemin = !empty(get_config('block_poll', 'responsecount')) ? get_config('block_poll', 'responsecount') : '0';
 
-        if ($responsecount <= $responsemin || $responsemin == '0') { return; }
+        if ($responsecount <= $responsemin || $responsemin == '0') { 
+            echo html_writer::div(get_string('notenoughresponses', 'block_poll', $responsemin+1) . $responsecount . '.','alert alert-error alert-block fade in');
+            return;
+        }
+
         $optioncount = count($options);
 
         $table = new html_table();
