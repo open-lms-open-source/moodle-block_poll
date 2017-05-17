@@ -100,7 +100,9 @@ switch ($action) {
             'action' => 'managepolls',
         ));
         if ($step == 'confirm') {
-            $sql = 'UPDATE {block_poll} p SET p.locked = "1" WHERE id = :pid';
+            $sql = 'UPDATE {block_poll}
+                    SET locked = 1
+                    WHERE id = :pid';
             $DB->execute($sql, array('pid' => $pid));
             $url = $urlno;
         } else {
