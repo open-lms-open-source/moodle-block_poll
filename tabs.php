@@ -53,14 +53,24 @@ if ($action == 'configblock') {
     redirect($url);
 }
 
+$output = $PAGE->get_renderer('block_poll');
 $PAGE->set_url('/blocks/poll/tabs.php');
 $PAGE->set_context($context);
 $PAGE->requires->css('/blocks/poll/styles.css');
-echo $OUTPUT->header();
+echo $output->header();
 
 print_tabs(array($tabs), $action);
 
 echo html_writer::empty_tag('br');
-require("tab_$action.php");
+if ($action == 'managepolls') {
+    $polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id));
+    $actionclass = "\block_poll\output\\{$action}";
+    $renderable = new $actionclass($COURSE->id, $instanceid, $url, $polls);
+    $renderer = $PAGE->get_renderer('block_poll');
 
-echo $OUTPUT->footer();
+    echo $output->render($renderable);
+} else {
+    require("tab_$action.php");
+}
+
+echo $output->footer();
