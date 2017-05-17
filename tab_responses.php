@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$pid = optional_param('pid', 0, PARAM_INTEGER);
+$pid = optional_param('pid', 0, PARAM_INT);
 
 require_once(dirname(__FILE__) . '/lib.php');
 
-function poll_custom_callback($a, $b) {
+function block_poll_custom_callback($a, $b) {
     $counta = $a->responsecount;
     $countb = $b->responsecount;
     return ($counta == $countb ? 0 : ($counta > $countb ? -1 : 1));
@@ -50,7 +50,7 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
         $option->responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
         $option->responsecount = (!$option->responses ? 0 : count($option->responses));
     }
-    poll_sort_results($options, 'poll_custom_callback');
+    poll_sort_results($options, 'block_poll_custom_callback');
 
     echo $OUTPUT->box_start();
     echo("<div style=\"text-align:left;\"><strong>$poll->questiontext</strong><ol>");

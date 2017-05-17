@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 function xmldb_block_poll_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
@@ -26,6 +28,7 @@ function xmldb_block_poll_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+        upgrade_block_savepoint(true, 2011041400, 'poll');
     }
 
     // Add a new column for lockint polls.
@@ -36,6 +39,7 @@ function xmldb_block_poll_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+        upgrade_block_savepoint(true, 2017031600, 'poll');
     }
 
     return true;

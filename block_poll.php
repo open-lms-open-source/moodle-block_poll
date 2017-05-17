@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("$CFG->dirroot/blocks/poll/lib.php");
 
 class block_poll extends block_base {
@@ -39,9 +41,9 @@ class block_poll extends block_base {
     }
 
     public function specialization() {
-    if (!empty($this->config) && !empty($this->config->customtitle)) {
-            $this->title = $this->config->customtitle;
-    } else {
+        if (!empty($this->config) && !empty($this->config->customtitle)) {
+                $this->title = $this->config->customtitle;
+        } else {
             $this->title = get_string('formaltitle', 'block_poll');
         }
     }
@@ -72,8 +74,8 @@ class block_poll extends block_base {
                 (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
                 ($switched) ||
                 (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
-        } else { 
-           return false; 
+        } else {
+            return false;
         }
     }
 
