@@ -60,6 +60,13 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
     echo('</ol></div>');
     echo $OUTPUT->box_end();
 
+    $userfields = user_picture::fields('u');
+    $sql = "SELECT DISTINCT $userfields
+            FROM {user} u
+            JOIN {block_poll_response} r ON r.userid = u.id
+            WHERE r.pollid = ?";
+    $users = $DB->get_records_sql($sql, [$poll->id]);
+
     if (!(isset($poll->anonymous) && $poll->anonymous == 1)
         && $responses = $DB->get_records('block_poll_response', array('pollid' => $poll->id), 'submitted ASC')) {
         $responsecount = count($responses);
@@ -74,13 +81,12 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
         $table->width = '*';
 
         foreach ($responses as $response) {
-            $user = $DB->get_record('user', array('id' => $response->userid), user_picture::fields());
-            if (!$user) {
+            if (!isset($users[$response->userid])) {
                 continue;
             }
-            $table->data[] = array_merge(array($OUTPUT->user_picture($user, array($cid)),
-                                fullname($user), userdate($response->submitted)),
-                                block_poll_get_response_checks($options, $response->optionid));
+            $table->data[] = array_merge(array($output->user_picture($users[$response->userid], array($cid)),
+                                fullname($users[$response->userid]), userdate($response->submitted)),
+                                $output->get_response_checks($options, $response->optionid));
         }
 
         echo html_writer::table($table);
@@ -99,16 +105,16 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
 
         $table = new html_table();
         $table->head = array('&nbsp;', get_string('user'));
-        $table->tablealign = 'left';
-        $table->width = '*';
+        $table->attributes['class'] = 'generaltable boxalignleft';
 
         foreach ($responses as $response) {
-            $user = $DB->get_record('user', array('id' => $response->userid), user_picture::fields());
-            if (!$user) {
+            if (!isset($users[$response->userid])) {
                 continue;
             }
-            $table->data[] = array_merge(array($OUTPUT->user_picture($user, array($cid)),
-                                fullname($user)));
+            $table->data[] = array_merge([
+                $output->user_picture($users[$response->userid], [$cid]),
+                fullname($users[$response->userid])
+            ]);
         }
 
         echo html_writer::table($table);
