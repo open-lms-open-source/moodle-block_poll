@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Lang strings for the Poll block.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @copyright  Paul Holden
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['choose'] = 'Choose...';
 $string['config_param'] = 'Parameter';
 $string['config_value'] = 'Value';

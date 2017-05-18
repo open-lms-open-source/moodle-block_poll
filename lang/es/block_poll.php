@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Lang strings for the Poll block.
+ *
+ * @package    block_poll
+ * @copyright  unknown
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['config_param'] = 'Parámetro';
 $string['config_value'] = 'Valor';
 $string['editblocktitle'] = 'Título del bloque';

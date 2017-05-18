@@ -51,7 +51,7 @@ class managepolls implements renderable, templatable {
     protected $url;
 
     /**
-     * The courses_view constructor.
+     * The managepolls constructor.
      *
      * @param int $courseid a course id.
      * @param int $instanceid the block instance id

@@ -14,6 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Poll block capabilities.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
 $capabilities = array(
 
    'block/poll:myaddinstance' => array(

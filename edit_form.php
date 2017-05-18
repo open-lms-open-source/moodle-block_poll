@@ -14,14 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Form for editing the poll block.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Class for defining the poll blocks edit form.
+ *
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class block_poll_edit_form extends block_edit_form {
+
+    /**
+     * Define the custom fields to display when editing a poll block.
+     *
+     * @param moodleform $mform
+     */
     protected function specific_definition($mform) {
         global $COURSE, $DB;
         // Fields for editing poll block title and contents.
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         $mform->addElement('text', 'config_customtitle', get_string('configtitle', 'block_html'));
-        $mform->setType('config_customtitle', PARAM_MULTILANG);
+        $mform->setType('config_customtitle', PARAM_TEXT);
 
         if ($polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id), '', 'id, name')) {
             $list = array(0 => get_string('choose', 'block_poll'));

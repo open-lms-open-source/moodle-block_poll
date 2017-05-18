@@ -14,8 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Poll block upgrade steps.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @copyright  2016, Robert Russo
+ * @copyright  2016, Louisiana State University
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Perform block_poll's upgrade steps.
+ *
+ * @param int $oldversion
+ * @return bool
+ */
 function xmldb_block_poll_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();

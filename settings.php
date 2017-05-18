@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Settings for the poll block plugin.
+ *
  * @package   block_poll
  * @copyright 2016, Robert Russo
  * @copyright 2016, Louisiana State University
@@ -23,19 +25,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (is_siteadmin()) {
-
-    require_once(dirname(__FILE__) . '/../../config.php');
+if ($ADMIN->fulltree) {
     require_once($CFG->libdir . '/adminlib.php');
 
-    // Create the new settings page
+    // Create the new settings page.
     $settings = new admin_settingpage('block_poll', get_string('formaltitle', 'block_poll'));
 
-    // default_minumum user responses before showing users
+    // Default minumum user responses before showing users.
     $settings->add( new admin_setting_configtext(
         'block_poll/responsecount',
-        get_string('minresponses', 'block_poll'),
-        get_string('minresponseshelp', 'block_poll'),
+        new lang_string('minresponses', 'block_poll'),
+        new lang_string('minresponseshelp', 'block_poll'),
         '10',
         PARAM_INT
     ));
