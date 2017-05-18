@@ -14,13 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Poll block
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once("$CFG->dirroot/blocks/poll/lib.php");
+require_once("$CFG->dirroot/blocks/poll/locallib.php");
 
+/**
+ * Poll block
+ *
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class block_poll extends block_base {
-
-    public $poll, $options;
 
     /**
      * Whether the block has configuration (it does)
@@ -31,107 +44,38 @@ class block_poll extends block_base {
         return true;
     }
 
+    /**
+     * Init.
+     */
     public function init() {
         $this->title = get_string('formaltitle', 'block_poll');
-        $this->version = 2015031700;
     }
 
+    /**
+     * Specify that we have instance specific configuration.
+     *
+     * @return bool
+     */
     public function instance_allow_config() {
         return true;
     }
 
+    /**
+     * Set the title of our block if one is configured.
+     */
     public function specialization() {
         if (!empty($this->config) && !empty($this->config->customtitle)) {
-                $this->title = $this->config->customtitle;
-        } else {
-            $this->title = get_string('formaltitle', 'block_poll');
+            $this->title = $this->config->customtitle;
         }
     }
 
-    public function poll_can_edit() {
-        return has_capability('block/poll:editpoll', $this->context);
-    }
-
-    public function poll_user_eligible() {
-        global $COURSE, $USER;
-
-        $parents = $this->context->get_parent_context_ids();
-        $parentctx = context::instance_by_id($parents[0]);
-
-        $switched = false;
-        if ($this->poll->eligible == 'students') {
-            $switched = is_role_switched($COURSE->id);
-            if (isset($USER->access['rsw'][$parentctx->path])) {
-                $switched = $switched
-                    && !role_context_capabilities($USER->access['rsw'][$parentctx->path], $this->context, 'block/poll:editpoll');
-            } else {
-                $switched = false;
-            }
-        }
-        // TODO: Proper roles & capabilities.
-        if ($this->poll->locked == 0) {
-            return ($this->poll->eligible == 'all') ||
-                (($this->poll->eligible == 'students') && !$this->poll_can_edit()) ||
-                ($switched) ||
-                (($this->poll->eligible == 'teachers') && $this->poll_can_edit());
-        } else {
-            return false;
-        }
-    }
-
-    public function poll_results_link() {
-        $url = new moodle_url('/blocks/poll/tabs.php',
-            array('action' => 'responses', 'pid' => $this->poll->id, 'instanceid' => $this->instance->id));
-        $html = html_writer::empty_tag('hr');
-        $html .= html_writer::link($url, get_string('responses', 'block_poll'));
-        return $html;
-    }
-
-    public function poll_print_options() {
-        global $CFG, $COURSE;
-        // TODO: Renderer/html_writer-ify.
-        $this->content->text .= '<form method="get" action="' . $CFG->wwwroot . '/blocks/poll/poll_action.php">
-                     <input type="hidden" name="action" value="respond" />
-                     <input type="hidden" name="pid" value="' . $this->poll->id . '" />
-                     <input type="hidden" name="id" value="' . $COURSE->id . '" />';
-        foreach ($this->options as $option) {
-            $this->content->text .= "<tr><td><input type=\"radio\" id=\"r_$option->id\" name=\"rid\" value=\"$option->id\" />
-                         <label for=\"r_$option->id\">$option->optiontext</label></td></tr>";
-        }
-        $this->content->text .= '<tr><td><input type="submit" value="' . get_string('submit', 'block_poll') . '" />
-            </td></tr></form>';
-    }
-
-    public function poll_get_results(&$results, $sort = true) {
-        global $DB;
-        foreach ($this->options as $option) {
-            $responses = $DB->get_records('block_poll_response', array('optionid' => $option->id));
-            $results[$option->optiontext] = (!$responses ? '0' : count($responses));
-        }
-        if ($sort) {
-            poll_sort_results($results);
-        }
-    }
-
-    public function poll_print_results() {
-        $this->poll_get_results($results);
-        $highest = 1;
-        foreach ($results as $option => $count) {
-            if ($count > $highest) {
-                $highest = $count;
-            }
-        }
-        $maxwidth = !empty($this->config->maxwidth) ? $this->config->maxwidth : 150;
-
-        foreach ($results as $option => $count) {
-            $img = ((isset($img) && $img == 0) ? 1 : 0);
-            $imgwidth = round($count / $highest * $maxwidth);
-            $this->content->text .= "<tr><td>$option ($count)<br />" . poll_get_graphbar($img, $imgwidth) . '</td></tr>';
-        }
-    }
-
+    /**
+     * Returns the contents.
+     *
+     * @return stdClass contents of block
+     */
     public function get_content() {
-        global $DB, $USER;
+        global $COURSE, $DB, $USER;
         if ($this->content !== null) {
             return $this->content;
         }
@@ -143,25 +87,17 @@ class block_poll extends block_base {
             return $this->content;
         }
 
-        $this->poll = $DB->get_record('block_poll', array('id' => $this->config->pollid));
-        $footertext = $this->poll->anonymous == 1 ? (html_writer::div(get_string('useranonymous', 'block_poll'), 'center alert alert-success alert-block fade in')) : (html_writer::div(get_string('notanonymous', 'block_poll'), 'center alert alert-error alert-block fade in'));
+        $renderer = $this->page->get_renderer('block_poll');
 
-        $this->options = $DB->get_records('block_poll_option', array('pollid' => $this->poll->id));
+        $poll = $DB->get_record('block_poll', array('id' => $this->config->pollid));
+        $options = $DB->get_records('block_poll_option', array('pollid' => $poll->id));
+        $response = $DB->get_record('block_poll_response', array('pollid' => $poll->id, 'userid' => $USER->id));
+        $maxwidth = !empty($this->config->maxwidth) ? $this->config->maxwidth : 150;
 
-        // TODO: html_table.
         $this->content = new stdClass();
-        $this->content->text = '<table cellspacing="2" cellpadding="2">';
-        $this->content->text .= '<tr><th>' . $this->poll->questiontext . '</th></tr>';
-
-        $response = $DB->get_record('block_poll_response', array('pollid' => $this->poll->id, 'userid' => $USER->id));
-        $func = 'poll_print_' . (!$response && $this->poll_user_eligible() ? 'options' : 'results');
-        $this->$func();
-
-        $this->content->text .= '</table>';
-
-        $this->content->footer = '';
-        $this->content->footer .= ($this->poll_can_edit() ? $this->poll_results_link() : '');
-        $this->content->footer .= $footertext;
+        $renderable = new block_poll\output\poll($this->context, $COURSE->id, $USER, $poll, $options, $response, $maxwidth);
+        $this->content->text = $renderer->render($renderable);
+        $this->content->footer = $renderer->footertext($poll, $this->instance->id, $renderable->canedit);
 
         return $this->content;
     }

@@ -95,15 +95,15 @@ class managepolls implements renderable, templatable {
                 'title' => $poll->name,
                 'optioncount' => (!$options ? '0' : count($options)),
                 'responsecount' => (!$responses ? '0' : count($responses)),
-                'urlpreview' => $urlpreview->raw_out(false),
-                'urllock' => $urllock->raw_out(false),
-                'urledit' => $urledit->raw_out(false),
-                'urldelete' => $urldelete->raw_out(false),
+                'urlpreview' => $urlpreview->out(false),
+                'urllock' => $urllock->out(false),
+                'urledit' => $urledit->out(false),
+                'urldelete' => $urldelete->out(false),
             ];
         }
 
         return [
-            'baseurl' => $this->url->raw_out(false),
+            'baseurl' => $this->url->out(false),
             'courseid' => $this->courseid,
             'instanceid' => $this->instanceid,
             'rows' => $rows,

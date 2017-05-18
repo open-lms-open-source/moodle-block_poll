@@ -37,6 +37,7 @@ $string['editpolleligible'] = 'Eligible users';
 $string['editpolloptions'] = 'Option count';
 $string['formaltitle'] = 'Poll';
 $string['lock'] = 'Lock';
+$string['missingblock'] = 'Missing block instance';
 $string['nopollsavailable'] = 'No polls are currently available, select the create/edit poll link below to create one.';
 $string['option'] = 'Option';
 $string['pluginname'] = 'Poll';

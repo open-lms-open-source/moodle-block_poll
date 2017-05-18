@@ -14,8 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-$plugin->version = 2017031600;
-$plugin->requires = 2014050800;
+/**
+ * Poll block version definition
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->version = 2017051601;
+$plugin->requires = 2015051100;
 $plugin->component = 'block_poll';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '2.7.0.1';
+$plugin->release   = '2.9.0.0';

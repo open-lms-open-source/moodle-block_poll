@@ -14,18 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+/**
+ * Poll action controller.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @copyright  Paul Holden
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once(dirname(__FILE__).'/../../config.php');
+require_once('locallib.php');
 
 $action = required_param('action', PARAM_ALPHA);
-$pid = optional_param('pid', 0, PARAM_INTEGER);
-$cid = required_param('id', PARAM_INTEGER);
+$pid = optional_param('pid', 0, PARAM_INT);
+$cid = required_param('id', PARAM_INT);
 $srcpage = optional_param('page', '', PARAM_TEXT);
 if ($cid == 0) {
     if (!$cid = optional_param('course', 0, PARAM_INT)) {
         $cid = SITEID;
     }
 }
-$instanceid = optional_param('instanceid', 0, PARAM_INTEGER);
+$instanceid = optional_param('instanceid', 0, PARAM_INT);
+
+require_login($cid);
+
 $sesskey = $USER->sesskey;
 $mymoodleref = strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/my/') !== false
     || strpos($_SERVER["HTTP_REFERER"], $CFG->wwwroot.'/admin/stickyblocks.php') !== false;
@@ -35,18 +49,6 @@ $pageurl = new moodle_url('/blocks/poll/poll_action.php',
     array('action' => $action, 'id' => $cid, 'pid' => $pid, 'instanceid' => $instanceid));
 $PAGE->set_context($context);
 $PAGE->set_url($pageurl);
-
-function test_allowed_to_update($cid = 0) {
-    global $COURSE;
-    $cid = $cid == 0 ? $COURSE->id : $cid;
-    $context = context_course::instance($cid);
-
-    if (has_capability('block/poll:editpoll', $context)) {
-        return true;
-    } else {
-        print_error(get_string('pollwarning', 'block_poll'));
-    }
-}
 
 if ($stickyblocksref) {
     $url = new moodle_url('/my/indexsys.php', array('pt' => 'my-index'));
@@ -63,7 +65,7 @@ if (in_array($action, $tabs)) {
 
 switch ($action) {
     case 'create':
-        test_allowed_to_update($cid);
+        block_poll_allowed_to_update($cid);
         $poll = new stdClass();
         $poll->id = $pid;
         $poll->name = required_param('name', PARAM_TEXT);
@@ -71,9 +73,9 @@ switch ($action) {
         $poll->questiontext = required_param('questiontext', PARAM_TEXT);
         $poll->eligible = required_param('eligible', PARAM_ALPHA);
         $poll->created = time();
-        $poll->anonymous = optional_param('anonymous', 0, PARAM_INTEGER);
+        $poll->anonymous = optional_param('anonymous', 0, PARAM_INT);
         $newid = $DB->insert_record('block_poll', $poll, true);
-        $optioncount = optional_param('optioncount', 0, PARAM_INTEGER);
+        $optioncount = optional_param('optioncount', 0, PARAM_INT);
         for ($i = 0; $i < $optioncount; $i++) {
             $pollopt = new stdClass();
             $pollopt->id = 0;
@@ -90,7 +92,7 @@ switch ($action) {
         ));
         break;
     case 'lock':
-        test_allowed_to_update($cid);
+        block_poll_allowed_to_update($cid);
         $step = optional_param('step', 'first', PARAM_TEXT);
         $urlno = clone $url;
         $urlno->params(array(
@@ -125,7 +127,7 @@ switch ($action) {
         }
         break;
     case 'edit':
-        test_allowed_to_update($cid);
+        block_poll_allowed_to_update($cid);
         $poll = $DB->get_record('block_poll', array('id' => $pid));
         $poll->name = required_param('name', PARAM_TEXT);
         $poll->questiontext = required_param('questiontext', PARAM_TEXT);
@@ -171,7 +173,7 @@ switch ($action) {
         ));
         break;
     case 'delete':
-        test_allowed_to_update($cid);
+        block_poll_allowed_to_update($cid);
         $step = optional_param('step', 'first', PARAM_TEXT);
         $urlno = clone $url;
         $urlno->params(array(

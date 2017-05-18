@@ -14,31 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Edit poll tab
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || exit;
 
 $id = optional_param('id', 0, PARAM_INT);
 $pid = optional_param('pid', 0, PARAM_INT);
 
-$polls = $DB->get_records('block_poll', array('courseid' => $cid));
-$menu = array();
-if ($polls !== false) {
-    foreach ($polls as $poll) {
-        $menu[$poll->id] = $poll->name;
-    }
-}
-// TODO: Renderify.
-echo $OUTPUT->box_start();
-echo html_writer::start_tag('form', array('action' => '#', 'method' => 'get', 'id' => 'pollselect_form'));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'cid', 'value' => $cid));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'instanceid', 'value' => $instanceid));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'action', 'value' => 'editpoll'));
-echo get_string('editpollname', 'block_poll').': ';
-echo html_writer::select($menu, 'pid', $pid, array('' => 'choosedots'), array('id' => 'pid', 'class' => 'autosubmit'));
-echo html_writer::end_tag('form');
-$PAGE->requires->yui_module('moodle-core-formautosubmit',
-    'M.core.init_formautosubmit',
-    array(array('selectid' => 'pid', 'nothing' => false)));
-echo $OUTPUT->box_end();
+$menu = $DB->get_records_menu('block_poll', ['courseid' => $cid], '', 'id, name');
+$url->param('action', 'editpoll');
+echo $output->poll_selector($url, $menu, $pid);
 
 $poll = $DB->get_record('block_poll', array('id' => $pid));
 $polloptions = array();
@@ -58,13 +50,13 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blocka
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'course', 'value' => $COURSE->id));
 
 $eligible = array('all' => get_string('all'), 'students' => get_string('students'), 'teachers' => get_string('teachers'));
-for ($i = 1; $i <= 10; $options[$i++] = ($i - 1)) {
+for ($i = 1; $i <= 10; $i++) {
+    $options[$i] = $i;
 }
 
 $table = new html_table();
 $table->head = array(get_string('config_param', 'block_poll'), get_string('config_value', 'block_poll'));
-$table->tablealign = 'left';
-$table->width = '*';
+$table->attributes['class'] = 'generaltable boxalignleft';
 
 $stranonresp = get_string('editanonymousresponses', 'block_poll');
 $anoncheck = isset($poll->anonymous) && $poll->anonymous == 1 ? 'checked="checked" disabled="disabled"' : '';

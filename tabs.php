@@ -14,13 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
+/**
+ * Poll block management tabs.
+ *
+ * @package    block_poll
+ * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
+ * @copyright  2017 Blackboard Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
+require_once(dirname(__FILE__).'/../../config.php');
 
 $action = required_param('action', PARAM_ALPHA);
 $instanceid = required_param('instanceid', PARAM_INT);
 
 if (!$bi = $DB->get_record('block_instances', array('id' => $instanceid))) {
-    print_error('Missing block instance!'); // TODO: Stringify.
+    print_error('missingblock', 'block_poll');
 }
 $config = unserialize(base64_decode($bi->configdata));
 
@@ -35,6 +45,8 @@ require_capability('block/poll:editpoll', $context);
 
 $tabs = array();
 $tabnames = array('configblock', 'editpoll', 'managepolls', 'responses');
+$params = array('cid' => $cid, 'instanceid' => $instanceid);
+$baseurl = new moodle_url('/blocks/poll/tabs.php', $params);
 foreach ($tabnames as $tabname) {
     $params = array('action' => $tabname, 'cid' => $cid, 'instanceid' => $instanceid);
     $url = new moodle_url('/blocks/poll/tabs.php', $params);
@@ -62,15 +74,13 @@ echo $output->header();
 print_tabs(array($tabs), $action);
 
 echo html_writer::empty_tag('br');
-if ($action == 'managepolls') {
-    $polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id));
-    $actionclass = "\block_poll\output\\{$action}";
-    $renderable = new $actionclass($COURSE->id, $instanceid, $url, $polls);
-    $renderer = $PAGE->get_renderer('block_poll');
-
-    echo $output->render($renderable);
-} else {
+if ($action != 'managepolls') {
     require("tab_$action.php");
+} else if ($action == 'managepolls') {
+    $polls = $DB->get_records('block_poll', array('courseid' => $COURSE->id));
+    $renderable = new \block_poll\output\managepolls($COURSE->id, $instanceid, $baseurl, $polls);
+    $renderer = $PAGE->get_renderer('block_poll');
+    echo $output->render($renderable);
 }
 
 echo $output->footer();
