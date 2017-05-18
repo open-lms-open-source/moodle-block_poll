@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2017051800;
+$plugin->version = 2017051801;
 $plugin->requires = 2016052300;
 $plugin->component = 'block_poll';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '3.1.0.1';
+$plugin->release   = '3.1.0.2';
