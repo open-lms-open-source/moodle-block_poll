@@ -8,17 +8,17 @@
 }
 
 #page-blocks-poll-tabs a img {
-   background: transparent;
-   padding: 0 5px;
+    background: transparent;
+    padding: 0 5px;
 }
 
 .block_poll div.center {
-   padding: 2px;
-   margin-bottom: 0;
-   text-align: center;
-   text-transform: lowercase;
+    padding: 2px;
+    margin-bottom: 0;
+    text-align: center;
+    text-transform: lowercase;
 }
 
 .block_poll div.center:first-letter {
-   text-transform: capitalize;
+    text-transform: capitalize;
 }
