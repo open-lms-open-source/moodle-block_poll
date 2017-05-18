@@ -52,7 +52,7 @@ function xmldb_block_poll_upgrade($oldversion) {
     if ($oldversion < 2017031600) {
         $table = new xmldb_table('block_poll');
         $field = new xmldb_field('locked');
-        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'created');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'anonymous');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
