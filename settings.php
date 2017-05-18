@@ -28,9 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 if ($ADMIN->fulltree) {
     require_once($CFG->libdir . '/adminlib.php');
 
-    // Create the new settings page.
-    $settings = new admin_settingpage('block_poll', get_string('formaltitle', 'block_poll'));
-
     // Default minumum user responses before showing users.
     $settings->add( new admin_setting_configtext(
         'block_poll/responsecount',
