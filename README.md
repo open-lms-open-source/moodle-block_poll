@@ -8,8 +8,8 @@ Allows you to create custom polls for use in a Moodle course. A course can have 
 ### Using Moodle
 You can install the plugin from the Moodle plugin repository from within your Moodle installation.
 ### Using a downloaded zip file
-You can download a zip of this module from: https://github.com/netspotau/moodle-mod_lightboxgalley/zipball/master  
-Unzip it to your mod/ folder and rename the extracted folder to 'lightboxgallery'.
+You can download a zip of this module from: https://github.com/netspotau/moodle-block_poll/zipball/master  
+Unzip it to your blocks/ folder and rename the extracted folder to 'poll'.
 ### Using Git
 To install using git, run the following command from the root of your moodle installation:  
 git clone git://github.com/netspotau/moodle-block_poll.git block/poll  
