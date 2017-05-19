@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Poll block rendrer
+ * Poll block renderer
  *
  * @package    block_poll
  * @copyright  2017 Adam Olley <adam.olley@blackboard.com>
