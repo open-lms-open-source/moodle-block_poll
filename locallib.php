@@ -91,7 +91,7 @@ function block_poll_get_response_counts($options) {
     }
 
     list ($insql, $params) = $DB->get_in_or_equal(array_keys($options));
-    $sql = "SELECT optionid, count(1)
+    $sql = "SELECT optionid, count(1) AS count
                 FROM {block_poll_response}
                 WHERE optionid $insql
                 GROUP BY optionid";
