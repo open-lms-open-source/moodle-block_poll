@@ -1,4 +1,4 @@
-#Poll block for Moodle
+# Poll block for Moodle
 
 [![Build Status](https://travis-ci.org/netspotau/moodle-block_poll.svg?branch=master)](https://travis-ci.org/netspotau/moodle-block_poll)
 [![License](https://poser.pugx.org/netspotau/moodle-block_poll/license)](https://packagist.org/packages/netspotau/moodle-block_poll)
@@ -16,6 +16,6 @@ git clone git://github.com/netspotau/moodle-block_poll.git block/poll
 
 Then add block/poll to your gitignore.
 
-##Credits
+## Credits
 Developer: Adam Olley (adam.olley@blackboard.com)  
 Original developer: Paul Holden (pholden[at]greenhead[dot]ac[dot]uk)  
