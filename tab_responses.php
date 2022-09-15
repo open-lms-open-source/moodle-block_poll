@@ -48,7 +48,9 @@ if (($poll = $DB->get_record('block_poll', array('id' => $pid)))
     echo('</ol></div>');
     echo $output->box_end();
 
-    $userfields = user_picture::fields('u');
+    $userfields = \core_user\fields::for_userpic()
+        ->get_sql('u', false, '', '', false)
+        ->selects;
     $sql = "SELECT DISTINCT $userfields
             FROM {user} u
             JOIN {block_poll_response} r ON r.userid = u.id
